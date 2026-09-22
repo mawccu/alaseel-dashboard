@@ -190,9 +190,11 @@ export async function isInitialised(loaded) {
     return hasRows;
   }
   try {
-    const { data, error } = await supabase.from("app_meta").select("value").eq("key", "seeded").maybeSingle();
+    // قائمة وليس maybeSingle: الصيغة المفردة ترد 406/PGRST116 عند صفر صفوف،
+    // فيُقرأ "لا توجد علامة" خطأً على أنه فشل اتصال.
+    const { data, error } = await supabase.from("app_meta").select("value").eq("key", "seeded").limit(1);
     if (error) throw error;
-    if (data) return true;
+    if (data && data.length) return true;
     if (hasRows) {
       // قاعدة قائمة قبل إضافة الجدول: علّمها ولا تزرع فوقها أبداً.
       await markInitialised();
