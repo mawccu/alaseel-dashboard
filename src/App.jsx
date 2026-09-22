@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { C, GOVS, CATEGORIES, PRODUCTS, REPS, MONTHS_AR, STATUS_META } from "./lib/constants.js";
 import { fmtNum, fmtJD, fmtPct, daysAgo, isoDate, dateOffset, statusOf } from "./lib/helpers.js";
 import { seedData } from "./lib/seed.js";
-import { loadData, saveData, backendLabel } from "./lib/store.js";
+import { loadData, saveData, backendLabel, isInitialised, markInitialised } from "./lib/store.js";
 import { Card, KPI, SectionTitle, Btn, Input, Select, StatusBadge } from "./components/ui.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import Pharmacies from "./components/Pharmacies.jsx";
@@ -18,14 +18,26 @@ export default function App() {
   const [tab, setTab] = useState("dashboard");
   const [filters, setFilters] = useState({ year: "all", month: "all", gov: "all", rep: "all", product: "all", status: "all" });
   const [saveState, setSaveState] = useState("");
+  const [readOnly, setReadOnly] = useState(false);
 
-  /* تحميل البيانات — من Supabase، ومع أول تشغيل تُزرع البيانات التجريبية في قاعدة البيانات */
+  /* تحميل البيانات.
+     قراءة فاشلة لا تعني قاعدة فارغة: في تلك الحالة نعرض آخر نسخة محلية
+     ونمنع الكتابة، وإلا لمسحت المطابقة كل صف حيّ في القاعدة. */
   const refresh = useCallback(async () => {
-    const loaded = await loadData();
-    if (loaded && (loaded.pharmacies || []).length) { setData(loaded); return; }
+    const { ok, data: loaded } = await loadData();
+    setReadOnly(!ok);
+    setData(loaded);
+    if (!ok) return;
+    if (await isInitialised(loaded)) return;
+    // قاعدة جديدة فعلاً: ازرع البيانات التجريبية مرة واحدة، إضافةً بلا حذف.
     const fresh = seedData();
     setData(fresh);
-    try { await saveData(fresh); } catch (e) { console.error("seed save failed", e); }
+    try {
+      await saveData(fresh, { mirror: false });
+      await markInitialised();
+    } catch (e) {
+      console.error("seed save failed", e);
+    }
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
@@ -33,6 +45,11 @@ export default function App() {
   /* حفظ البيانات */
   const persist = useCallback(async (next) => {
     setData(next);
+    if (readOnly) {
+      setSaveState("عرض فقط — لم يُحفظ");
+      setTimeout(() => setSaveState(""), 3500);
+      return;
+    }
     setSaveState("جارٍ الحفظ…");
     try {
       await saveData(next);
@@ -42,7 +59,7 @@ export default function App() {
       setSaveState("تعذّر الحفظ");
     }
     setTimeout(() => setSaveState(""), 2500);
-  }, []);
+  }, [readOnly]);
 
   /* ===== الإحصاءات المشتقة ===== */
   const stats = useMemo(() => {

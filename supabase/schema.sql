@@ -32,6 +32,13 @@ create table if not exists public.transactions (
   created_at   timestamptz not null default now()
 );
 
+-- علامات النظام. وجود المفتاح seeded يعني أن هذه القاعدة هُيّئت من قبل،
+-- فلا يزرع التطبيق البيانات التجريبية فوق بيانات حقيقية مهما بدت الجداول فارغة.
+create table if not exists public.app_meta (
+  key    text primary key,
+  value  text
+);
+
 create table if not exists public.reviews (
   id             text primary key,
   month          text not null,
@@ -60,10 +67,12 @@ create index if not exists pharmacies_rep_idx        on public.pharmacies (rep);
 alter table public.pharmacies   enable row level security;
 alter table public.transactions enable row level security;
 alter table public.reviews      enable row level security;
+alter table public.app_meta     enable row level security;
 
 drop policy if exists "open access" on public.pharmacies;
 drop policy if exists "open access" on public.transactions;
 drop policy if exists "open access" on public.reviews;
+drop policy if exists "open access" on public.app_meta;
 
 create policy "open access" on public.pharmacies
   for all to anon, authenticated using (true) with check (true);
@@ -74,9 +83,12 @@ create policy "open access" on public.transactions
 create policy "open access" on public.reviews
   for all to anon, authenticated using (true) with check (true);
 
+create policy "open access" on public.app_meta
+  for all to anon, authenticated using (true) with check (true);
+
 -- ============ تحقق ============
 select tablename, rowsecurity
 from pg_tables
 where schemaname = 'public'
-  and tablename in ('pharmacies','transactions','reviews')
+  and tablename in ('pharmacies','transactions','reviews','app_meta')
 order by tablename;
