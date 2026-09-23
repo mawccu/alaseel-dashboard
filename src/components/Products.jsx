@@ -2,8 +2,8 @@ import React, { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { C, PRODUCTS } from "../lib/constants.js";
 import { fmtJD, fmtPct } from "../lib/helpers.js";
-import { Card, SectionTitle } from "./ui.jsx";
-import { Y_CAT, TICK, TICK_SM, cut, barsHeight } from "../lib/chart.js";
+import { Card, SectionTitle, ChartTip, Empty } from "./ui.jsx";
+import { Y_CAT, TICK, TICK_SM, cut, barsHeight, GRID, SALES, R_H } from "../lib/chart.js";
 
 export default function Products({ stats }) {
   // نمو لكل منتج: نصف الفترة الأخيرة مقابل السابقة
@@ -29,15 +29,17 @@ export default function Products({ stats }) {
       <div className="grid-charts">
         <Card>
           <SectionTitle>📦 المبيعات حسب المنتج</SectionTitle>
-          <ResponsiveContainer width="100%" height={barsHeight(rows.length)}>
+          {rows.length ? (
+<ResponsiveContainer width="100%" height={barsHeight(rows.length)}>
             <BarChart data={rows} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+              <CartesianGrid {...GRID} />
               <XAxis type="number" tick={TICK} />
               <YAxis type="category" dataKey="name" width={Y_CAT} tick={TICK_SM} interval={0} tickFormatter={cut(24)} />
-              <Tooltip formatter={(v) => fmtJD(v)} />
-              <Bar dataKey="المبيعات" fill={C.blue} radius={[0, 6, 6, 0]} />
+              <Tooltip content={<ChartTip fmt={fmtJD} />} cursor={{ fill: "rgba(37,99,235,.06)" }} />
+              <Bar dataKey="المبيعات" fill={SALES} radius={R_H} />
             </BarChart>
           </ResponsiveContainer>
+          ) : <Empty />}
         </Card>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <Card style={{ background: C.greenLight, borderColor: C.green }}>

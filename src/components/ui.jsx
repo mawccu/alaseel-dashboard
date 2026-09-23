@@ -1,4 +1,4 @@
-import { C, STATUS_META } from "../lib/constants.js";
+import { C, STATUS_META, readable } from "../lib/constants.js";
 
 export const Card = ({ children, style }) => (
   <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, ...style }}>{children}</div>
@@ -23,16 +23,19 @@ export const SectionTitle = ({ children }) => (
   <h3 style={{ fontSize: 15, fontWeight: 700, color: C.gray, margin: "0 0 14px" }}>{children}</h3>
 );
 
-export const Btn = ({ children, onClick, color = C.blue, outline, small, style }) => (
-  <button onClick={onClick} style={{
-    background: outline ? C.white : color, color: outline ? color : "#fff",
-    border: `1.5px solid ${color}`, borderRadius: 10,
-    padding: small ? "6px 12px" : "9px 18px", fontSize: small ? 12 : 13.5,
-    fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "opacity .15s", ...style
-  }}
-    onMouseEnter={(e) => e.currentTarget.style.opacity = ".85"}
-    onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}>{children}</button>
-);
+export const Btn = ({ children, onClick, color = C.blue, outline, small, style }) => {
+  const col = readable(color); // النص بلون الزر أو فوقه يحتاج تبايناً 4.5:1
+  return (
+    <button onClick={onClick} style={{
+      background: outline ? C.white : col, color: outline ? col : "#fff",
+      border: `1.5px solid ${col}`, borderRadius: 10,
+      padding: small ? "6px 12px" : "9px 18px", fontSize: small ? 12 : 13.5,
+      fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "opacity .15s", ...style
+    }}
+      onMouseEnter={(e) => e.currentTarget.style.opacity = ".85"}
+      onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}>{children}</button>
+  );
+};
 
 export const Input = (props) => (
   <input {...props} style={{
@@ -56,3 +59,42 @@ export const StatusBadge = ({ status }) => {
   return <span style={{ background: m.bg, color: m.color, padding: "3px 10px", borderRadius: 999, fontSize: 12, fontWeight: 700 }}>● {m.label}</span>;
 };
 
+
+/*
+  تلميح مخصّص للرسوم. تلميح recharts الافتراضي يرث اتجاه الصفحة بشكل
+  غير متوقّع ولا يُنسّق الأرقام، فتظهر القيمة خاماً مثل 3825 بلا فاصلة ولا عملة.
+*/
+export const ChartTip = ({ active, payload, label, fmt }) => {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div style={{
+      background: C.white, border: `1px solid ${C.border}`, borderRadius: 10,
+      padding: "9px 12px", fontSize: 12.5, fontFamily: "Tajawal, sans-serif",
+      direction: "rtl", boxShadow: "0 6px 20px rgba(15,23,42,.12)", minWidth: 120,
+    }}>
+      {label !== undefined && label !== "" && (
+        <div style={{ fontWeight: 800, color: C.gray, marginBottom: 6 }}>{label}</div>
+      )}
+      {payload.map((p) => (
+        <div key={p.dataKey ?? p.name} style={{ display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" }}>
+          <span style={{ width: 9, height: 9, borderRadius: 3, background: p.color || p.fill, flex: "none" }} />
+          <span style={{ color: C.grayMid }}>{p.name}</span>
+          <b style={{ marginInlineStart: "auto", color: C.gray }}>{fmt ? fmt(p.value) : p.value}</b>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* حالة فارغة. الفلاتر قد لا تُطابق شيئاً، وكان الرسم يظهر عندها فارغاً بلا تفسير. */
+export const Empty = ({ height = 200, text = "لا توجد بيانات مطابقة للفلاتر المحددة" }) => (
+  <div style={{
+    height, display: "grid", placeItems: "center", color: C.grayMid,
+    fontSize: 13, textAlign: "center", padding: 16,
+  }}>
+    <div>
+      <div style={{ fontSize: 26, marginBottom: 6, opacity: .45 }}>🗂️</div>
+      {text}
+    </div>
+  </div>
+);

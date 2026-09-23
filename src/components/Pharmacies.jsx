@@ -55,7 +55,7 @@ export default function Pharmacies({ data, stats, persist }) {
 
       <Card style={{ padding: 0, overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
-          <table>
+          <table className="wide">
             <thead><tr>
               <th>الصيدلية</th><th>الكود</th><th>المحافظة</th><th>المنطقة</th><th>الفئة</th><th>المالك</th><th>الموبايل</th><th>المندوب</th>
               <th>فتح الحساب</th><th>أول طلب</th><th>آخر طلب</th><th>مبيعات YTD</th><th>الطلبات</th><th>متوسط الفاتورة</th><th>أيام بين الطلبات</th><th>الحالة</th><th className="no-print"></th>

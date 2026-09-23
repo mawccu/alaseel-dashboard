@@ -67,6 +67,14 @@ export default function App() {
     const { pharmacies, transactions } = data;
 
     // فلترة المعاملات
+    // حالة كل صيدلية تُحتسب من كامل تاريخها لا من الجزء المفلتر.
+    const lastById = {};
+    transactions.forEach((t) => {
+      if (!lastById[t.pharmacyId] || t.date > lastById[t.pharmacyId]) lastById[t.pharmacyId] = t.date;
+    });
+    const statusById = {};
+    pharmacies.forEach((p) => { statusById[p.id] = statusOf(lastById[p.id] || null); });
+
     let txs = transactions.filter((t) => {
       const d = new Date(t.date);
       if (filters.year !== "all" && d.getFullYear() !== +filters.year) return false;
@@ -76,6 +84,9 @@ export default function App() {
       if (!p) return false;
       if (filters.gov !== "all" && p.governorate !== filters.gov) return false;
       if (filters.rep !== "all" && p.rep !== filters.rep) return false;
+      // مرشّح الحالة كان يُطبَّق على جدول الصيدليات فقط، فتبقى المؤشرات والرسوم
+      // على كامل المبيعات بينما يظهر الجدول مفلتراً. الآن يعمل كأخويه.
+      if (filters.status !== "all" && statusById[p.id] !== filters.status) return false;
       return true;
     });
 
@@ -236,7 +247,32 @@ export default function App() {
         table { border-collapse: collapse; width: 100%; }
         th { background: ${C.grayLight}; color: ${C.gray}; font-size: 12px; font-weight: 700; padding: 10px 8px; text-align: right; border-bottom: 2px solid ${C.border}; white-space: nowrap; }
         td { font-size: 12.5px; padding: 9px 8px; border-bottom: 1px solid ${C.border}; }
+        /* تخطيط متناوب: الجدول العريض فيه 17 عموداً، والتناوب يُبقي العين على الصف */
+        tbody tr:nth-child(even) td { background: #FBFCFD; }
         tr:hover td { background: ${C.blueLight}; }
+
+        /* جدول الصيدليات 17 عموداً وعرضه أكبر من الشاشة. نُثبّت عمود الاسم
+           عند الحافة حتى لا يضيع السياق عند التمرير الأفقي. */
+        table.wide th:first-child, table.wide td:first-child {
+          position: sticky; inset-inline-start: auto; right: 0; z-index: 1;
+          background: ${C.white}; box-shadow: -1px 0 0 ${C.border};
+        }
+        table.wide thead th:first-child { z-index: 3; background: ${C.grayLight}; }
+        table.wide tbody tr:nth-child(even) td:first-child { background: #FBFCFD; }
+        table.wide tr:hover td:first-child { background: ${C.blueLight}; }
+
+        /* أرقام متساوية العرض حيث تصطف رأسياً: الجداول ومحاور الرسوم.
+           القيم الكبيرة في بطاقات المؤشرات تبقى بأرقام متناسبة. */
+        td, .recharts-cartesian-axis-tick text { font-variant-numeric: tabular-nums; }
+
+        /* وضوح لمستخدم لوحة المفاتيح */
+        :focus-visible { outline: 2px solid ${C.blue}; outline-offset: 2px; border-radius: 6px; }
+
+        /* شريط تمرير رفيع للجداول العريضة بدل الشريط العريض الافتراضي */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; background-clip: content-box; }
+        ::-webkit-scrollbar-track { background: transparent; }
 
         /* الشبكات. minmax(0,1fr) ضروري: القيمة 1fr وحدها لا تصغُر تحت حجم
            محتواها، فتتمدد البطاقة ويخرج الرسم من حدودها فوق ما بجانبه. */

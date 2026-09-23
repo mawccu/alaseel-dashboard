@@ -28,6 +28,18 @@ export const cut = (n) => (s) => {
 // ارتفاع يتناسب مع عدد الفئات بدل رقم ثابت.
 export const barsHeight = (count, per = 30, min = 260) => Math.max(min, count * per + 64);
 
+// شبكة بخط شعري متصل. التقطيع (strokeDasharray) ضوضاء بصرية ويُقرأ كأنه
+// عتبة أو إسقاط بينما هو مجرد شبكة.
+export const GRID = { stroke: "#EEF2F6", strokeWidth: 1, vertical: false };
+
+// المبيعات بالدينار تُرسم بالأزرق في كل مكان. كان رسم "أفضل المنتجات" أخضر
+// بينما يقيس نفس المقدار، فيبدو اللون كأنه يحمل معنى وهو لا يحمله.
+export const SALES = "#2563EB";
+
+// نهايات مستديرة رفيعة مثبّتة على خط الأساس.
+export const R_H = [0, 5, 5, 0];
+export const R_V = [5, 5, 0, 0];
+
 // تسميات المحور الأفقي العربية تتصادم أفقياً، فنميلها ونحجز لها ارتفاعاً.
 export const angledX = {
   interval: 0,

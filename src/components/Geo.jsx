@@ -2,8 +2,8 @@ import React from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { C, GOVS } from "../lib/constants.js";
 import { fmtJD } from "../lib/helpers.js";
-import { Card, SectionTitle } from "./ui.jsx";
-import { Y_NUM, Y_NUM_SM, TICK, angledX } from "../lib/chart.js";
+import { Card, SectionTitle, ChartTip, Empty } from "./ui.jsx";
+import { Y_NUM, Y_NUM_SM, TICK, angledX, GRID, SALES, R_V } from "../lib/chart.js";
 
 export default function Geo({ stats }) {
   const govStats = GOVS.map((g) => {
@@ -24,29 +24,33 @@ export default function Geo({ stats }) {
       <div className="grid-charts">
         <Card>
           <SectionTitle>💰 المبيعات حسب المحافظة</SectionTitle>
-          <ResponsiveContainer width="100%" height={330}>
+          {govStats.length ? (
+<ResponsiveContainer width="100%" height={330}>
             <BarChart data={govStats}>
-              <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+              <CartesianGrid {...GRID} />
               <XAxis dataKey="gov" {...angledX} />
               <YAxis tick={TICK} width={Y_NUM} />
-              <Tooltip formatter={(v) => fmtJD(v)} />
-              <Bar dataKey="sales" name="المبيعات" fill={C.blue} radius={[6, 6, 0, 0]} />
+              <Tooltip content={<ChartTip fmt={fmtJD} />} cursor={{ fill: "rgba(37,99,235,.06)" }} />
+              <Bar dataKey="sales" name="المبيعات" fill={SALES} radius={R_V} />
             </BarChart>
           </ResponsiveContainer>
+          ) : <Empty />}
         </Card>
         <Card>
           <SectionTitle>🏥 الصيدليات: نشطة / جديدة / مفقودة</SectionTitle>
-          <ResponsiveContainer width="100%" height={330}>
+          {govStats.length ? (
+<ResponsiveContainer width="100%" height={330}>
             <BarChart data={govStats}>
-              <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+              <CartesianGrid {...GRID} />
               <XAxis dataKey="gov" {...angledX} />
               <YAxis tick={TICK} allowDecimals={false} width={Y_NUM_SM} />
-              <Tooltip /><Legend wrapperStyle={{ fontFamily: "Tajawal", fontSize: 12 }} />
-              <Bar dataKey="active" name="نشطة" fill={C.green} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="newAcc" name="جديدة" fill={C.blue} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="lost" name="مفقودة" fill={C.red} radius={[4, 4, 0, 0]} />
+              <Tooltip content={<ChartTip />} cursor={{ fill: "rgba(37,99,235,.06)" }} /><Legend wrapperStyle={{ fontFamily: "Tajawal", fontSize: 12 }} />
+              <Bar dataKey="active" name="نشطة" fill={C.green} radius={R_V} />
+              <Bar dataKey="newAcc" name="جديدة" fill={C.blue} radius={R_V} />
+              <Bar dataKey="lost" name="مفقودة" fill={C.red} radius={R_V} />
             </BarChart>
           </ResponsiveContainer>
+          ) : <Empty />}
         </Card>
       </div>
 

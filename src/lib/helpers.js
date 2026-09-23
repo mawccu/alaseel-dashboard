@@ -1,4 +1,8 @@
-export const fmtNum = (n) => new Intl.NumberFormat("ar-JO", { maximumFractionDigits: 0 }).format(n || 0);
+// أرقام لاتينية. لوحة المؤشرات كانت تعرض ٤٢٬١٢٠ بينما النِّسب ومحاور الرسوم
+// وأعداد الجداول في الشاشة نفسها لاتينية، وهو ما تستعمله المستندات المالية هنا.
+// للعودة إلى الأرقام الهندية: اجعل LOCALE = "ar-JO".
+const LOCALE = "ar-JO-u-nu-latn";
+export const fmtNum = (n) => new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 }).format(n || 0);
 export const fmtJD = (n) => fmtNum(n) + " د.أ";
 export const fmtPct = (n) => (n > 0 ? "+" : "") + (n || 0).toFixed(1) + "%";
 export const daysAgo = (dateStr) => Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
