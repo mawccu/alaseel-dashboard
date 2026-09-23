@@ -3,7 +3,9 @@
 Performance-management dashboard for ALASEEL Cosmetics distribution channels in Jordan,
 run with Masrouji Group. Arabic (RTL), built with Vite + React, backed by Supabase.
 
-**Live:** https://mawccu.github.io/alaseel-dashboard/
+**Live on two hosts, same build:**
+- Cloudflare Pages: https://alaseel-dashboard.pages.dev
+- GitHub Pages: https://mawccu.github.io/alaseel-dashboard/
 
 ## What it does
 
@@ -61,14 +63,28 @@ npm run preview
 
 ## Deploying
 
-`vite build` writes to `docs/`, and GitHub Pages serves `main` at `/docs`. So:
+`vite build` writes to `docs/`, which both hosts serve.
+
+GitHub Pages serves `main` at `/docs`, so a push deploys it:
 
 ```bash
 npm run build
 git add -A && git commit -m "rebuild" && git push
 ```
 
-`base` in `vite.config.js` is `/alaseel-dashboard/` and must match the repo name.
+Cloudflare Pages is direct upload, so it needs one command:
+
+```bash
+npm run deploy:cf
+```
+
+That builds and uploads to the `alaseel-dashboard` project. It needs `wrangler login`
+once per machine. The project was created with `--force` so it lives on classic Pages;
+do not pass `--force` again.
+
+`base` in `vite.config.js` is `"./"`, which emits relative asset URLs. That is what lets
+one build serve from the GitHub Pages sub-path and from a Cloudflare root domain at the
+same time. Do not pin it back to `/alaseel-dashboard/` or the Cloudflare host breaks.
 
 ## Origin
 
