@@ -25,7 +25,7 @@ export default function Sales({ data, stats, persist, exportCSV }) {
 
   return (
     <div className="fade" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+      <div className="grid-kpi">
         <KPI title="إجمالي المبيعات (مفلتر)" value={fmtJD(stats.totalSales)} color={C.blue} />
         <KPI title="عدد الفواتير" value={fmtNum(stats.orders)} color={C.gray} />
         <KPI title="متوسط الفاتورة" value={fmtJD(stats.avgInvoice)} color={C.green} />
@@ -42,7 +42,7 @@ export default function Sales({ data, stats, persist, exportCSV }) {
       {editing && (
         <Card style={{ border: `2px solid ${C.blue}` }}>
           <SectionTitle>{editing.id ? "تعديل فاتورة" : "فاتورة جديدة"}</SectionTitle>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+          <div className="grid-form">
             <div><label style={lbl}>تاريخ الفاتورة</label><Input type="date" value={editing.date} onChange={(e) => setEditing({ ...editing, date: e.target.value })} /></div>
             <div><label style={lbl}>رقم الفاتورة *</label><Input value={editing.invoiceNo} onChange={(e) => setEditing({ ...editing, invoiceNo: e.target.value })} /></div>
             <div><label style={lbl}>الصيدلية</label><Select value={editing.pharmacyId} onChange={(e) => setEditing({ ...editing, pharmacyId: e.target.value })} options={data.pharmacies.map((p) => ({ value: p.id, label: p.name }))} /></div>

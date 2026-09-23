@@ -33,7 +33,7 @@ export default function Pharmacies({ data, stats, persist }) {
       {editing && (
         <Card style={{ border: `2px solid ${C.blue}` }}>
           <SectionTitle>{editing.id ? "تعديل صيدلية" : "إضافة صيدلية جديدة"}</SectionTitle>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+          <div className="grid-form">
             <div><label style={lbl}>اسم الصيدلية *</label><Input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></div>
             <div><label style={lbl}>كود الحساب</label><Input value={editing.code} onChange={(e) => setEditing({ ...editing, code: e.target.value })} /></div>
             <div><label style={lbl}>المحافظة</label><Select value={editing.governorate} onChange={(e) => setEditing({ ...editing, governorate: e.target.value })} options={GOVS} /></div>

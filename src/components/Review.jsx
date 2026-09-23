@@ -67,7 +67,7 @@ export default function Review({ data, persist }) {
                     <Btn small outline color={C.red} onClick={() => remove(r.id)}>🗑️</Btn>
                   </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10, fontSize: 13 }}>
+                <div className="grid-cards" style={{ fontSize: 13 }}>
                   {fields.map(([f, l]) => r[f] && (
                     <div key={f} style={{ background: C.bg, borderRadius: 10, padding: 12 }}>
                       <div style={{ fontWeight: 800, marginBottom: 4 }}>{l}</div>

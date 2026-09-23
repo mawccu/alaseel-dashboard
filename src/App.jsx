@@ -237,6 +237,35 @@ export default function App() {
         th { background: ${C.grayLight}; color: ${C.gray}; font-size: 12px; font-weight: 700; padding: 10px 8px; text-align: right; border-bottom: 2px solid ${C.border}; white-space: nowrap; }
         td { font-size: 12.5px; padding: 9px 8px; border-bottom: 1px solid ${C.border}; }
         tr:hover td { background: ${C.blueLight}; }
+
+        /* الشبكات. minmax(0,1fr) ضروري: القيمة 1fr وحدها لا تصغُر تحت حجم
+           محتواها، فتتمدد البطاقة ويخرج الرسم من حدودها فوق ما بجانبه. */
+        .grid-kpi    { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+        .grid-charts { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-wide   { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+        .grid-cards  { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); }
+        .grid-form   { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .grid-filters{ display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+        @media (max-width: 1000px) { .grid-charts { grid-template-columns: minmax(0, 1fr); } }
+        @media (max-width: 560px)  { .grid-kpi, .grid-cards, .grid-form { grid-template-columns: minmax(0, 1fr); } }
+        /* ستة مرشّحات فوق بعضها تدفع المحتوى بعيداً على الهاتف */
+        @media (max-width: 560px)  { .grid-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+        /* الجداول تُمرَّر أفقياً داخل غلافها، فالالتفاف داخل الخلية يشوّه الصف بلا فائدة */
+        td { white-space: nowrap; }
+        td.wrap { white-space: normal; }
+
+        /* لا يتجاوز الرسم بطاقته مهما ضاقت */
+        .recharts-wrapper, .recharts-surface { max-width: 100%; }
+
+        /* جذر مشكلة تراكب النصوص على الرسوم:
+           الصفحة dir=rtl، وrecharts يرسم تسميات المحاور بـ text-anchor:end.
+           مع اتجاه rtl ينقلب معنى end، فيُرسم النص يمين نقطة الإرساء أي
+           داخل منطقة الرسم فوق الأعمدة، بدل أن يستقر في حيّزه.
+           نُثبّت اتجاه نصوص الرسم على ltr: تشكيل الحروف العربية داخل المقطع
+           يبقى صحيحاً (ثنائي الاتجاه يعالجه لكل مقطع)، ويعود الإرساء سليماً. */
+        .recharts-surface text { direction: ltr; }
+        .chart-scroll { overflow-x: auto; overflow-y: hidden; }
         @media (prefers-reduced-motion: reduce) { .fade { animation: none; } }
       `}</style>
 
@@ -292,7 +321,7 @@ export default function App() {
       </header>
 
       {/* ===== الفلاتر ===== */}
-      <div className="no-print" style={{ padding: "14px 24px 0", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, maxWidth: 1400, margin: "0 auto" }}>
+      <div className="no-print grid-filters" style={{ padding: "14px 16px 0", maxWidth: 1400, margin: "0 auto" }}>
         <Select value={filters.year} onChange={(e) => setFilters({ ...filters, year: e.target.value })}
           options={[{ value: "all", label: "كل السنوات" }, ...years.map((y) => ({ value: y, label: y }))]} />
         <Select value={filters.month} onChange={(e) => setFilters({ ...filters, month: e.target.value })}

@@ -1,6 +1,7 @@
 import React from "react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { C, GOVS } from "../lib/constants.js";
+import { Y_NUM, Y_CAT, TICK, TICK_SM, cut, angledX } from "../lib/chart.js";
 import { fmtNum, fmtJD, fmtPct } from "../lib/helpers.js";
 import { Card, KPI, SectionTitle, StatusBadge } from "./ui.jsx";
 
@@ -12,7 +13,7 @@ export default function Dashboard({ stats }) {
   ];
   return (
     <div className="fade" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14 }}>
+      <div className="grid-kpi">
         <KPI title="إجمالي المبيعات" value={fmtJD(stats.totalSales)} sub={`${fmtNum(stats.orders)} فاتورة`} color={C.blue} icon="💰" />
         <KPI title="النمو الشهري" value={fmtPct(stats.growth)} sub="مقارنة بالشهر السابق" color={stats.growth >= 0 ? C.green : C.red} icon="📈" />
         <KPI title="حسابات نشطة" value={fmtNum(stats.counts.active)} sub="آخر شراء ≤ 90 يوم" color={C.green} icon="✅" />
@@ -25,17 +26,17 @@ export default function Dashboard({ stats }) {
         <KPI title="التغطية الجغرافية" value={fmtNum(stats.coverage) + " محافظة"} sub={`من أصل ${GOVS.length}`} color={C.blueDark} icon="🗺️" />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 16 }}>
+      <div className="grid-charts">
         <Card>
           <SectionTitle>📈 اتجاه المبيعات الشهري</SectionTitle>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={stats.monthlyTrend}>
               <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={C.blue} stopOpacity={.25} /><stop offset="100%" stopColor={C.blue} stopOpacity={0} />
               </linearGradient></defs>
               <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
               <XAxis dataKey="name" tick={{ fontSize: 11, fontFamily: "Tajawal" }} />
-              <YAxis tick={{ fontSize: 11 }} width={55} />
+              <YAxis tick={TICK} width={Y_NUM} />
               <Tooltip formatter={(v) => fmtJD(v)} />
               <Area type="monotone" dataKey="المبيعات" stroke={C.blue} strokeWidth={2.5} fill="url(#g1)" />
             </AreaChart>
@@ -43,11 +44,11 @@ export default function Dashboard({ stats }) {
         </Card>
         <Card>
           <SectionTitle>🗺️ المبيعات حسب المحافظة</SectionTitle>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={stats.govData}>
               <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fontFamily: "Tajawal" }} />
-              <YAxis tick={{ fontSize: 11 }} width={55} />
+              <XAxis dataKey="name" {...angledX} />
+              <YAxis tick={TICK} width={Y_NUM} />
               <Tooltip formatter={(v) => fmtJD(v)} />
               <Bar dataKey="المبيعات" fill={C.blue} radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -55,7 +56,7 @@ export default function Dashboard({ stats }) {
         </Card>
         <Card>
           <SectionTitle>🎯 توزيع حالة الحسابات</SectionTitle>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={95} paddingAngle={3}>
                 {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
@@ -66,11 +67,11 @@ export default function Dashboard({ stats }) {
         </Card>
         <Card>
           <SectionTitle>📦 أفضل المنتجات</SectionTitle>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={stats.productData.slice(0, 6)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
-              <XAxis type="number" tick={{ fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 10.5, fontFamily: "Tajawal" }} />
+              <XAxis type="number" tick={TICK} />
+              <YAxis type="category" dataKey="name" width={Y_CAT} tick={TICK_SM} interval={0} tickFormatter={cut(24)} />
               <Tooltip formatter={(v) => fmtJD(v)} />
               <Bar dataKey="المبيعات" fill={C.green} radius={[0, 6, 6, 0]} />
             </BarChart>

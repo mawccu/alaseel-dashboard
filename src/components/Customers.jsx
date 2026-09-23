@@ -40,7 +40,7 @@ export default function Customers({ stats }) {
 
   return (
     <div className="fade" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+      <div className="grid-kpi">
         <KPI title="متوسط تكرار الطلبات" value={fmtNum(stats.netAvgGap) + " يوم"} color={C.blue} icon="⏱️" />
         <KPI title="متوسط قيمة الفاتورة" value={fmtJD(stats.avgInvoice)} color={C.green} icon="🧾" />
         <KPI title="عملاء جدد" value={fmtNum(newCust.length)} color={C.blue} icon="🆕" />

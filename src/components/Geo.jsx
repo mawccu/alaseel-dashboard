@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { C, GOVS } from "../lib/constants.js";
 import { fmtJD } from "../lib/helpers.js";
 import { Card, SectionTitle } from "./ui.jsx";
+import { Y_NUM, Y_NUM_SM, TICK, angledX } from "../lib/chart.js";
 
 export default function Geo({ stats }) {
   const govStats = GOVS.map((g) => {
@@ -20,14 +21,14 @@ export default function Geo({ stats }) {
 
   return (
     <div className="fade" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 16 }}>
+      <div className="grid-charts">
         <Card>
           <SectionTitle>💰 المبيعات حسب المحافظة</SectionTitle>
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={330}>
             <BarChart data={govStats}>
               <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
-              <XAxis dataKey="gov" tick={{ fontSize: 11, fontFamily: "Tajawal" }} />
-              <YAxis tick={{ fontSize: 11 }} width={55} />
+              <XAxis dataKey="gov" {...angledX} />
+              <YAxis tick={TICK} width={Y_NUM} />
               <Tooltip formatter={(v) => fmtJD(v)} />
               <Bar dataKey="sales" name="المبيعات" fill={C.blue} radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -35,11 +36,11 @@ export default function Geo({ stats }) {
         </Card>
         <Card>
           <SectionTitle>🏥 الصيدليات: نشطة / جديدة / مفقودة</SectionTitle>
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={330}>
             <BarChart data={govStats}>
               <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
-              <XAxis dataKey="gov" tick={{ fontSize: 11, fontFamily: "Tajawal" }} />
-              <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={35} />
+              <XAxis dataKey="gov" {...angledX} />
+              <YAxis tick={TICK} allowDecimals={false} width={Y_NUM_SM} />
               <Tooltip /><Legend wrapperStyle={{ fontFamily: "Tajawal", fontSize: 12 }} />
               <Bar dataKey="active" name="نشطة" fill={C.green} radius={[4, 4, 0, 0]} />
               <Bar dataKey="newAcc" name="جديدة" fill={C.blue} radius={[4, 4, 0, 0]} />
@@ -49,7 +50,7 @@ export default function Geo({ stats }) {
         </Card>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 12 }}>
+      <div className="grid-cards">
         {govStats.map((g) => (
           <Card key={g.gov} style={{ padding: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
