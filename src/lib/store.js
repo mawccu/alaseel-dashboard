@@ -29,7 +29,7 @@ const configured =
   /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(SUPABASE_URL || "") && Boolean(SUPABASE_ANON_KEY);
 
 export const supabase = configured
-  ? createClient(SUPABASE_URL.replace(/\/$/, ""), SUPABASE_ANON_KEY, { auth: { persistSession: false } })
+  ? createClient(SUPABASE_URL.replace(/\/$/, ""), SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } })
   : null;
 
 let cloudLive = configured;
