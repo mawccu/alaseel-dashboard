@@ -11,6 +11,24 @@ const field = {
 };
 const label = { fontSize: 12.5, color: C.grayMid, fontWeight: 600, display: "block", marginBottom: 6 };
 
+/* الحقل بالإنجليزية (dir=ltr) فالزر يقع على حافته اليمنى، وهي حافة النهاية فيه. */
+const EYE_BOX = 42;
+const EyeOpen = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M1.8 12S5.5 5.2 12 5.2 22.2 12 22.2 12 18.5 18.8 12 18.8 1.8 12 1.8 12Z" />
+    <circle cx="12" cy="12" r="3.1" />
+  </svg>
+);
+const EyeOff = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M9.9 5.4A8.9 8.9 0 0 1 12 5.2c6.5 0 10.2 6.8 10.2 6.8a17 17 0 0 1-3 3.9M6.3 6.4A17 17 0 0 0 1.8 12S5.5 18.8 12 18.8c1.9 0 3.5-.6 4.9-1.4" />
+    <path d="M10 10a2.8 2.8 0 0 0 4 4" />
+    <path d="M3 3l18 18" />
+  </svg>
+);
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +36,7 @@ export default function Login() {
   const [err, setErr] = useState("");
   const [note, setNote] = useState("");
   const [mode, setMode] = useState("in"); // "in" = دخول، "up" = إنشاء حساب
+  const [showPw, setShowPw] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -33,6 +52,7 @@ export default function Login() {
       setNote("أُنشئ الحساب. أُرسلت رسالة تأكيد إلى بريدك: افتح الرابط فيها ثم عُد وسجّل الدخول.");
       setMode("in");
       setPassword("");
+      setShowPw(false);
     }
     // الدخول الناجح لا يحتاج معالجة: مستمع تغيّر الجلسة في App يعيد الرسم.
   };
@@ -88,10 +108,28 @@ export default function Login() {
 
           <div style={{ marginBottom: 18 }}>
             <label style={label} htmlFor="password">كلمة المرور</label>
-            <input id="password" type="password" autoComplete={mode === "up" ? "new-password" : "current-password"} dir="ltr" style={field}
-              value={password} onChange={(e) => setPassword(e.target.value)}
-              onFocus={(e) => (e.target.style.borderColor = C.blue)}
-              onBlur={(e) => (e.target.style.borderColor = C.border)} />
+            <div style={{ position: "relative" }}>
+              <input id="password" type={showPw ? "text" : "password"}
+                autoComplete={mode === "up" ? "new-password" : "current-password"} dir="ltr"
+                style={{ ...field, paddingRight: EYE_BOX }}
+                value={password} onChange={(e) => setPassword(e.target.value)}
+                onFocus={(e) => (e.target.style.borderColor = C.blue)}
+                onBlur={(e) => (e.target.style.borderColor = C.border)} />
+              <button type="button" onClick={() => setShowPw(!showPw)}
+                aria-label={showPw ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                aria-pressed={showPw} aria-controls="password"
+                title={showPw ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                style={{
+                  position: "absolute", top: 0, bottom: 0, right: 0, width: EYE_BOX,
+                  display: "grid", placeItems: "center", background: "none", border: "none",
+                  padding: 0, cursor: "pointer", color: showPw ? C.blue : C.grayMid,
+                  borderRadius: 10, transition: "color .15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = showPw ? C.blueDark : C.gray)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = showPw ? C.blue : C.grayMid)}>
+                {showPw ? <EyeOff /> : <EyeOpen />}
+              </button>
+            </div>
           </div>
 
           {err && (
