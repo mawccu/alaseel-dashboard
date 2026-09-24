@@ -44,8 +44,14 @@ function arabicError(message = "") {
   if (m.includes("signups not allowed") || m.includes("signup is disabled"))
     return "إنشاء الحسابات مغلق في هذا النظام";
   if (m.includes("email not confirmed")) return "لم يُفعَّل هذا البريد بعد. أكّد الرسالة المُرسلة إليه أو فعّله من لوحة Supabase";
+  // حدّ Supabase المجاني على إرسال البريد ضيّق (رسائل قليلة في الساعة).
+  // الرسالة العامة "حاول لاحقاً" كانت تُخفي أن العائق هو إرسال البريد لا الدخول.
+  if (m.includes("email rate limit") || m.includes("over_email_send_rate_limit"))
+    return "بلغ إرسال رسائل التأكيد حدّه لهذه الساعة. عطّل تأكيد البريد من لوحة Supabase ليعمل الإنشاء فوراً، أو انتظر ساعة.";
   if (m.includes("too many requests") || m.includes("rate limit"))
     return "محاولات كثيرة متتالية. انتظر قليلاً ثم أعد المحاولة";
+  if (m.includes("invalid") && m.includes("email"))
+    return "صيغة البريد الإلكتروني غير صحيحة";
   if (m.includes("failed to fetch") || m.includes("network"))
     return "تعذّر الوصول إلى الخادم. تحقّق من الاتصال بالإنترنت";
   return message || "تعذّر تسجيل الدخول";
