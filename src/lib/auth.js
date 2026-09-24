@@ -1,4 +1,5 @@
 import { supabase } from "./store.js";
+import { ALLOW_SIGNUP } from "./config.js";
 
 /*
   المصادقة.
@@ -14,6 +15,7 @@ import { supabase } from "./store.js";
 */
 
 export const authReady = Boolean(supabase);
+export const signupAllowed = ALLOW_SIGNUP;
 
 export async function getSession() {
   if (!supabase) return null;
@@ -35,6 +37,12 @@ export function onAuthChange(cb) {
 function arabicError(message = "") {
   const m = message.toLowerCase();
   if (m.includes("invalid login credentials")) return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
+  if (m.includes("already registered") || m.includes("already been registered"))
+    return "هذا البريد مسجَّل من قبل. سجّل الدخول به أو استعد كلمة المرور";
+  if (m.includes("password should be") || m.includes("at least"))
+    return "كلمة المرور قصيرة. استعمل ٦ أحرف على الأقل";
+  if (m.includes("signups not allowed") || m.includes("signup is disabled"))
+    return "إنشاء الحسابات مغلق في هذا النظام";
   if (m.includes("email not confirmed")) return "لم يُفعَّل هذا البريد بعد. أكّد الرسالة المُرسلة إليه أو فعّله من لوحة Supabase";
   if (m.includes("too many requests") || m.includes("rate limit"))
     return "محاولات كثيرة متتالية. انتظر قليلاً ثم أعد المحاولة";
@@ -51,6 +59,18 @@ export async function signIn(email, password) {
   });
   if (error) return { error: arabicError(error.message) };
   return { session: data.session };
+}
+
+export async function signUp(email, password) {
+  if (!supabase) return { error: "قاعدة البيانات غير مهيأة" };
+  const { data, error } = await supabase.auth.signUp({
+    email: (email || "").trim(),
+    password: password || "",
+    options: { emailRedirectTo: window.location.origin + window.location.pathname },
+  });
+  if (error) return { error: arabicError(error.message) };
+  // مع تفعيل تأكيد البريد لا تُفتح جلسة فوراً، بل تُرسل رسالة تأكيد.
+  return { needsConfirm: !data.session, session: data.session };
 }
 
 export async function signOut() {

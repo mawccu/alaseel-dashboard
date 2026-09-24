@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { C } from "../lib/constants.js";
 import { ALASEEL_LOGO } from "../lib/logo.js";
 import { Btn } from "./ui.jsx";
-import { signIn, sendReset } from "../lib/auth.js";
+import { signIn, signUp, sendReset, signupAllowed } from "../lib/auth.js";
 
 const field = {
   width: "100%", boxSizing: "border-box", border: `1.5px solid ${C.border}`,
@@ -17,17 +17,24 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [note, setNote] = useState("");
+  const [mode, setMode] = useState("in"); // "in" = دخول، "up" = إنشاء حساب
 
   const submit = async (e) => {
     e.preventDefault();
     if (busy) return;
     setErr(""); setNote("");
     if (!email.trim() || !password) { setErr("أدخل البريد الإلكتروني وكلمة المرور"); return; }
+    if (mode === "up" && password.length < 6) { setErr("كلمة المرور قصيرة. استعمل ٦ أحرف على الأقل"); return; }
     setBusy(true);
-    const r = await signIn(email, password);
+    const r = mode === "up" ? await signUp(email, password) : await signIn(email, password);
     setBusy(false);
-    if (r.error) setErr(r.error);
-    // النجاح لا يحتاج معالجة: مستمع تغيّر الجلسة في App يعيد الرسم.
+    if (r.error) { setErr(r.error); return; }
+    if (r.needsConfirm) {
+      setNote("أُنشئ الحساب. أُرسلت رسالة تأكيد إلى بريدك: افتح الرابط فيها ثم عُد وسجّل الدخول.");
+      setMode("in");
+      setPassword("");
+    }
+    // الدخول الناجح لا يحتاج معالجة: مستمع تغيّر الجلسة في App يعيد الرسم.
   };
 
   const reset = async () => {
@@ -81,7 +88,7 @@ export default function Login() {
 
           <div style={{ marginBottom: 18 }}>
             <label style={label} htmlFor="password">كلمة المرور</label>
-            <input id="password" type="password" autoComplete="current-password" dir="ltr" style={field}
+            <input id="password" type="password" autoComplete={mode === "up" ? "new-password" : "current-password"} dir="ltr" style={field}
               value={password} onChange={(e) => setPassword(e.target.value)}
               onFocus={(e) => (e.target.style.borderColor = C.blue)}
               onBlur={(e) => (e.target.style.borderColor = C.border)} />
@@ -105,7 +112,21 @@ export default function Login() {
             border: "none", borderRadius: 10, padding: "12px 18px", fontSize: 14.5,
             fontWeight: 700, cursor: busy ? "default" : "pointer", fontFamily: "inherit",
             transition: "opacity .15s",
-          }}>{busy ? "جارٍ التحقق…" : "تسجيل الدخول"}</button>
+          }}>{busy ? (mode === "up" ? "جارٍ الإنشاء…" : "جارٍ التحقق…") : (mode === "up" ? "إنشاء الحساب" : "تسجيل الدخول")}</button>
+
+          {signupAllowed && (
+            <div style={{ textAlign: "center", marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
+              <span style={{ fontSize: 12.5, color: C.grayMid }}>
+                {mode === "up" ? "لديك حساب بالفعل؟" : "لا تملك حساباً بعد؟"}{" "}
+              </span>
+              <button type="button" disabled={busy}
+                onClick={() => { setMode(mode === "up" ? "in" : "up"); setErr(""); setNote(""); }}
+                style={{
+                  background: "none", border: "none", color: C.blueText, fontSize: 12.5,
+                  fontWeight: 700, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline",
+                }}>{mode === "up" ? "تسجيل الدخول" : "إنشاء حساب جديد"}</button>
+            </div>
+          )}
 
           <div style={{ textAlign: "center", marginTop: 14 }}>
             <button type="button" onClick={reset} disabled={busy} style={{
@@ -116,7 +137,9 @@ export default function Login() {
         </form>
 
         <div style={{ textAlign: "center", marginTop: 16, fontSize: 11.5, color: C.grayMid, lineHeight: 1.7 }}>
-          الحسابات يُنشئها مدير النظام. لا يوجد تسجيل ذاتي.
+          {signupAllowed
+            ? "إنشاء الحسابات مفتوح مؤقتاً لتهيئة النظام، وسيُغلق بعدها."
+            : "الحسابات يُنشئها مدير النظام. لا يوجد تسجيل ذاتي."}
         </div>
       </div>
     </div>
