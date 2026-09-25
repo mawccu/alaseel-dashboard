@@ -5,7 +5,7 @@
 export const SUPABASE_URL = "https://fzzivhfqbsoaiamxumef.supabase.co";
 export const SUPABASE_ANON_KEY = "sb_publishable_NFvrfGzH5Y2A2ADERCgGIg_h3GkrKoE";
 
-// مؤقت: يسمح بإنشاء حساب من داخل التطبيق حتى يوجد أول حساب.
-// أعِده إلى false بعد إنشاء الحسابات، فالرابط عام والتسجيل المفتوح
-// يتيح لأي زائر إنشاء حساب.
-export const ALLOW_SIGNUP = true;
+// النظام للإداريين فقط: لا تسجيل ذاتي. الحسابات تُنشأ إدارياً.
+// هذا يُخفي الزر فقط، والمنع الحقيقي مُفعَّل على الخادم أيضاً
+// (disable_signup) لأن إخفاء الزر لا يمنع نداء /auth/v1/signup مباشرة.
+export const ALLOW_SIGNUP = false;
