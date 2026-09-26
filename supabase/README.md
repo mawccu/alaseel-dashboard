@@ -7,8 +7,12 @@ goes wrong when these are replayed on a database Supabase did not create.
 |---|---|---|
 | 0 | **`00_baseline_grants.sql`** | 27 Sep, see below |
 | 1 | `schema.sql` | 22 Sep |
-| 2 | `enable-auth.sql` | 24 Sep |
-| 3 | `harden_access.sql` | 24 Sep |
+| 2 | `enable-auth.sql` | 24 Sep, RLS and the policies |
+
+**`harden_access.sql` is gone**, deleted on 25 September by "Close self-registration: the system is
+admin-only" (`ad7166b`). Do not go looking for it in an older checkout and re-apply it: accounts
+here are provisioned by an admin, not self-served, and signup is disabled on the project itself
+because `/auth/v1/signup` is public and the browser key is in the bundle.
 
 **No function is defined twice here**, and this database has no functions at all, checked against
 the live project on 2026-09-27. So the only ordering trap is the baseline.
